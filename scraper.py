@@ -27,7 +27,7 @@ for letter in LETTER_RANGE:
     save(all_critics_index, 'data/index_' + str(LETTER_RANGE) + '.json')
 
 all_critics = []
-for critic in all_critics:
+for critic in all_critics_index:
     slug = critic['critic_url'].replace('/critic/', '')
     all_critics.append(metacritic.get_movie_critic(slug))
-    save(all_critics, 'data/critics/' + str(LETTER_RANGE) + '.json')
+    save(all_critics, 'data/critics_' + str(LETTER_RANGE) + '.json')

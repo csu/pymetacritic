@@ -5,6 +5,12 @@ from bs4 import BeautifulSoup
 import re
 import logging
 
+def cast_int(string):
+    return int(string.replace(',', ''))
+
+def cast_float(string):
+    return float(string.replace(',', ''))    
+
 def keep_trying_to_get_html(url):
     logging.debug('[keep_trying_to_get_html] Making request to: ' + url)
     try:
@@ -64,18 +70,18 @@ def get_movie_critic(slug):
     critscore_stats = find_by_class(soup, 'critscore_stats')
 
     ### Total review count ###
-    result['all_reviews']['count'] = int(find_by_class(critscore_stats, 'label').find('span').getText().replace(' reviews', ''))
+    result['all_reviews']['count'] = cast_int(find_by_class(critscore_stats, 'label').find('span').getText().replace(' reviews', ''))
 
     ### Percent compared to average (across all reviews)###
     result['all_reviews']['compared_to_average'] = dict()
-    result['all_reviews']['compared_to_average']['percent_higher'] = int(find_by_class(critscore_stats, 'data stats_score above_average', element_type='span').getText().replace('%', ''))
-    result['all_reviews']['compared_to_average']['percent_same'] = int(find_by_class(critscore_stats, 'data stats_score average', element_type='span').getText().replace('%', ''))
-    result['all_reviews']['compared_to_average']['percent_lower'] = int(find_by_class(critscore_stats, 'data stats_score below_average', element_type='span').getText().replace('%', ''))
+    result['all_reviews']['compared_to_average']['percent_higher'] = cast_int(find_by_class(critscore_stats, 'data stats_score above_average', element_type='span').getText().replace('%', ''))
+    result['all_reviews']['compared_to_average']['percent_same'] = cast_int(find_by_class(critscore_stats, 'data stats_score average', element_type='span').getText().replace('%', ''))
+    result['all_reviews']['compared_to_average']['percent_lower'] = cast_int(find_by_class(critscore_stats, 'data stats_score below_average', element_type='span').getText().replace('%', ''))
 
     ### Points against the average (across all reviews) ###
     points_against_average = find_by_class(find_by_class(soup, 'summary'), re.compile(r".*\baverage_value\b.*"), element_type='span').getText()
     # Get just the point value
-    points_against_average_num = float(points_against_average.split(' ')[0])
+    points_against_average_num = cast_float(points_against_average.split(' ')[0])
     # If the critic scores lower than the average, then make the value negative
     if 'lower' in points_against_average:
         points_against_average_num *= -1
@@ -86,7 +92,7 @@ def get_movie_critic(slug):
     score_counts = find_by_class(soup, 'score_counts', element_type='ol')
     for element in score_counts.find_all('li', class_='score_count'):
         label = element.find('span', class_='label').getText()
-        count = int(element.find('span', class_='count').getText())
+        count = cast_int(element.find('span', class_='count').getText())
         if label == 'Positive:':
             result['score_distribution']['positive'] = count
         elif label == 'Mixed:':
@@ -94,11 +100,11 @@ def get_movie_critic(slug):
         elif label == 'Negative:':
             result['score_distribution']['negative'] = count
 
-    result['movie_reviews_count'] = int(find_by_class(find_by_class(soup, 'reviews_total'), 'count', element_type='span').find('a').getText())
+    result['movie_reviews_count'] = cast_int(find_by_class(find_by_class(soup, 'reviews_total'), 'count', element_type='span').find('a').getText())
 
-    result['average_review_score'] = int(find_by_class(soup, re.compile(r".*\btextscore\b.*"), element_type='span').getText())
-    result['highest_review_score'] = int(find_by_class(soup, 'metascore_w small movie positive indiv perfect', element_type='span').getText())
-    result['lowest_review_score'] = int(find_by_class(soup, 'metascore_w small movie negative indiv', element_type='span').getText())
+    result['average_review_score'] = cast_int(find_by_class(soup, re.compile(r".*\btextscore\b.*"), element_type='span').getText())
+    result['highest_review_score'] = cast_int(find_by_class(soup, 'metascore_w small movie positive indiv perfect', element_type='span').getText())
+    result['lowest_review_score'] = cast_int(find_by_class(soup, 'metascore_w small movie negative indiv', element_type='span').getText())
 
     result['reviews'] = get_reviews_by_critic(url)
 
@@ -116,7 +122,7 @@ def get_reviews_by_critic(url):
         review_dict = dict()
 
         review_dict['movie_name'] = find_by_class(review, 'review_product').find('a').getText()
-        review_dict['score'] = int(find_by_class(review, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
+        review_dict['score'] = cast_int(find_by_class(review, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
         review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
         review_dict['publication_title'] = find_by_class(review, 'review_action publication_title', element_type='li').getText()
         
