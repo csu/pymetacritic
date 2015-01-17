@@ -1,5 +1,5 @@
 # pymetacritic
-Python API for Metacritic.
+Python API for Metacritic. Made at PennApps Winter 2015.
 
 ## Usage
 ```python
