@@ -6,10 +6,16 @@ import re
 import logging
 
 def cast_int(string):
-    return int(string.replace(',', ''))
+    try:
+        return int(string.replace(',', ''))
+    except:
+        return None
 
 def cast_float(string):
-    return float(string.replace(',', ''))    
+    try:
+        return float(string.replace(',', ''))    
+    except:
+        return None
 
 def keep_trying_to_get_html(url):
     logging.debug('[keep_trying_to_get_html] Making request to: ' + url)
@@ -122,9 +128,11 @@ def get_reviews_by_critic(url):
         review_dict = dict()
 
         review_dict['movie_name'] = find_by_class(review, 'review_product').find('a').getText()
-        review_dict['score'] = cast_int(find_by_class(review, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
         review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
         review_dict['publication_title'] = find_by_class(review, 'review_action publication_title', element_type='li').getText()
+
+        score_element = find_by_class(review, 'review_product_score brief_critscore', element_type='li')
+        review_dict['score'] = cast_int(find_by_class(score_element, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
         
         posted_date = find_by_class(review, 'review_action post_date', element_type='li')
         if posted_date:
