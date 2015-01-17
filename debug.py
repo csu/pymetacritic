@@ -1,6 +1,6 @@
 import metacritic
-import string
+import json
 
-for letter in string.lowercase:
-    print 'running on: ' + letter
-    metacritic.get_movie_critics_for_letter(letter)
+result = metacritic.get_all_movie_critics()
+with open('data.json', 'w') as outfile:
+    json.dump(result, outfile)

@@ -1,5 +1,6 @@
 import urllib2
 import time
+from string import lowercase as lowercase_letters
 from bs4 import BeautifulSoup
 
 def keep_trying_to_get_html(letter):
@@ -11,7 +12,7 @@ def keep_trying_to_get_html(letter):
         html_doc = opener.open(request).read()
         return html_doc
     except:
-        print 'error on: ' + letter + '. trying again.'
+        # print 'error on: ' + letter + '. trying again.'
         time.sleep(3)
         return keep_trying_to_get_html(letter)
 
@@ -19,8 +20,8 @@ def get_movie_critics_for_letter(letter):
     html_doc = keep_trying_to_get_html(letter)
     soup = BeautifulSoup(html_doc)
 
-    if (soup.find('div', {'class': 'page_nav'})):
-        print 'has pagination'
+    # if (soup.find('div', {'class': 'page_nav'})):
+    #     print 'has pagination'
 
     critics_elements = soup.find_all('li', {'class': 'product'})
 
@@ -33,3 +34,9 @@ def get_movie_critics_for_letter(letter):
             })
 
     return critics
+
+def get_all_movie_critics():
+    result = []
+    for letter in lowercase_letters:
+        result += get_movie_critics_for_letter(letter)
+    return result

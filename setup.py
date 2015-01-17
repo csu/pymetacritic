@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
   name = 'metacritic',
   packages = ['metacritic'],
-  version = '0.1.1',
+  version = '0.1.2',
   description = 'A Python API for Metacritic.',
   author = 'Christopher Su',
   author_email = 'chris+pypi@christopher.su',
