@@ -153,10 +153,10 @@ def get_movie_critic(slug):
         logging.debug(str(len(result['reviews'])) + ' reviews found in total for ' + slug)
 
         return result
-        
+
     except:
         # Give up on the critic if an exception makes it all the way to this level
-        pass
+        logging.error("Giving up on critic: " + slug)
 
 def get_reviews_by_critic(url):
     html_doc = keep_trying_to_get_html(url)

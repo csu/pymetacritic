@@ -12,6 +12,6 @@ logger.setLevel(logging.DEBUG)
 # test = metacritic.get_movie_critic('aa-dowd')
 # print test['highest_review_score']
 # print test['lowest_review_score']
-# metacritic.get_movie_critic('aaron-hillis')
+print json.dumps(metacritic.get_movie_critic('aaron-hillis'))
 # metacritic.get_movie_critic('aaron-cutler')
-metacritic.get_movie_critic('ao-scott') 
+# metacritic.get_movie_critic('ao-scott') 
