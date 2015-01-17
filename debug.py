@@ -1,2 +1,6 @@
 import metacritic
-print metacritic.get_critics_for_letter('a')
+import string
+
+for letter in string.lowercase:
+    print 'running on: ' + letter
+    metacritic.get_movie_critics_for_letter(letter)
