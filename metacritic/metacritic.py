@@ -45,7 +45,8 @@ def find_by_class(soup, class_, element_type='div'):
     return soup.find(element_type, attrs={'class': class_})
 
 def get_movie_critic(slug):
-    url = 'http://www.metacritic.com/critic/' + slug
+    url = 'http://www.metacritic.com/critic/' + slug + '?filter=movies&num_items=100&sort_options=critic_score&page=0'
+    # url = 'http://www.metacritic.com/critic/' + slug
     html_doc = keep_trying_to_get_html(url)
     soup = BeautifulSoup(html_doc)
 
@@ -94,4 +95,31 @@ def get_movie_critic(slug):
     result['highest_review_score'] = int(find_by_class(soup, 'metascore_w small movie positive indiv perfect', element_type='span').getText())
     result['lowest_review_score'] = int(find_by_class(soup, 'metascore_w small movie negative indiv', element_type='span').getText())
 
+    result['reviews'] = get_reviews_by_critic(url)
+
+    print len(result['reviews'])
+
     print result
+
+def get_reviews_by_critic(url):
+    html_doc = keep_trying_to_get_html(url)
+    soup = BeautifulSoup(html_doc)
+
+    reviews = []
+
+    for review in soup.find_all('div', class_='review_wrap'):
+        review_dict = dict()
+
+        review_dict['movie_name'] = find_by_class(review, 'review_product').find('a').getText()
+        review_dict['score'] = int(find_by_class(review, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
+        review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
+        review_dict['publication_title'] = find_by_class(review, 'review_action publication_title', element_type='li').getText()
+        review_dict['post_date'] = find_by_class(review, 'review_action post_date', element_type='li').getText().replace('Posted ', '')
+
+        reviews.append(review_dict)
+    
+    pagination = find_by_class(soup, 'flipper next', element_type='span').find('a')
+    if pagination:
+        reviews += get_reviews_by_critic('http://www.metacritic.com' + pagination['href'])
+
+    return reviews
