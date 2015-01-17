@@ -1,1 +1,1 @@
-from metacritic import Metacritic
+from metacritic import *
