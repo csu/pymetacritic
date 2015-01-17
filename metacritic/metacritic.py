@@ -69,20 +69,39 @@ def get_movie_critic(slug):
 
     ### Critic and publication name ###
     result['critic_name'] = find_by_class(soup, 'critic_title').getText().strip()
-    result['publication_title'] = find_by_class(soup, 'publication_title').find('a').getText()
+
+    try:
+        result['publication_title'] = find_by_class(soup, 'publication_title').find('a').getText()
+    except:
+        result['publication_title'] = None
 
     result['all_reviews'] = dict() # contains data that pertains to all reviews, not just movie reviews
 
     critscore_stats = find_by_class(soup, 'critscore_stats')
 
     ### Total review count ###
-    result['all_reviews']['count'] = cast_int(find_by_class(critscore_stats, 'label').find('span').getText().replace(' reviews', ''))
+    try:
+        result['all_reviews']['count'] = cast_int(find_by_class(critscore_stats, 'label').find('span').getText().replace(' reviews', ''))
+    except:
+        result['all_reviews']['count'] = None
 
     ### Percent compared to average (across all reviews)###
     result['all_reviews']['compared_to_average'] = dict()
-    result['all_reviews']['compared_to_average']['percent_higher'] = cast_int(find_by_class(critscore_stats, 'data stats_score above_average', element_type='span').getText().replace('%', ''))
-    result['all_reviews']['compared_to_average']['percent_same'] = cast_int(find_by_class(critscore_stats, 'data stats_score average', element_type='span').getText().replace('%', ''))
-    result['all_reviews']['compared_to_average']['percent_lower'] = cast_int(find_by_class(critscore_stats, 'data stats_score below_average', element_type='span').getText().replace('%', ''))
+
+    try:
+        result['all_reviews']['compared_to_average']['percent_higher'] = cast_int(find_by_class(critscore_stats, 'data stats_score above_average', element_type='span').getText().replace('%', ''))
+    except:
+        result['all_reviews']['compared_to_average']['percent_higher'] = None
+
+    try:
+        result['all_reviews']['compared_to_average']['percent_same'] = cast_int(find_by_class(critscore_stats, 'data stats_score average', element_type='span').getText().replace('%', ''))
+    except:
+        result['all_reviews']['compared_to_average']['percent_same'] = None
+
+    try:
+        result['all_reviews']['compared_to_average']['percent_lower'] = cast_int(find_by_class(critscore_stats, 'data stats_score below_average', element_type='span').getText().replace('%', ''))
+    except:
+        result['all_reviews']['compared_to_average']['percent_lower'] = None
 
     ### Points against the average (across all reviews) ###
     points_against_average = find_by_class(find_by_class(soup, 'summary'), re.compile(r".*\baverage_value\b.*"), element_type='span').getText()
@@ -110,9 +129,20 @@ def get_movie_critic(slug):
 
 
     review_scores_element = find_by_class(soup, 'profile_score_summary critscore_summary')
-    result['average_review_score'] = cast_int(find_by_class(soup, re.compile(r".*\btextscore\b.*"), element_type='span').getText())
-    result['highest_review_score'] = cast_int(find_by_class(review_scores_element, 'highest_review', element_type='tr').find('span').getText())
-    result['lowest_review_score'] = cast_int(find_by_class(review_scores_element, 'lowest_review', element_type='tr').find('span').getText())
+    try:
+        result['average_review_score'] = cast_int(find_by_class(soup, re.compile(r".*\btextscore\b.*"), element_type='span').getText())
+    except:
+        result['average_review_score'] = None
+
+    try:
+        result['highest_review_score'] = cast_int(find_by_class(review_scores_element, 'highest_review', element_type='tr').find('span').getText())
+    except:
+        result['highest_review_score'] = None
+
+    try:
+        result['lowest_review_score'] = cast_int(find_by_class(review_scores_element, 'lowest_review', element_type='tr').find('span').getText())
+    except:
+        result['lowest_review_score'] = None
 
     result['reviews'] = get_reviews_by_critic(url)
 
@@ -130,16 +160,30 @@ def get_reviews_by_critic(url):
         review_dict = dict()
 
         review_dict['movie_name'] = find_by_class(review, 'review_product').find('a').getText()
-        review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
-        review_dict['publication_title'] = find_by_class(review, 'review_action publication_title', element_type='li').getText()
 
-        score_element = find_by_class(review, 'review_product_score brief_critscore', element_type='li')
-        review_dict['score'] = cast_int(find_by_class(score_element, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
-        
-        posted_date = find_by_class(review, 'review_action post_date', element_type='li')
-        if posted_date:
-            review_dict['post_date'] = posted_date.getText().replace('Posted ', '')
-        else:
+        try:
+            review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
+        except:
+            review_dict['review_body'] = None
+
+        try:
+            review_dict['publication_title'] = find_by_class(review, 'review_action publication_title', element_type='li').getText()
+        except:
+            review_dict['publication_title'] = None
+
+        try:
+            score_element = find_by_class(review, 'review_product_score brief_critscore', element_type='li')
+            review_dict['score'] = cast_int(find_by_class(score_element, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
+        except:
+            review_dict['score'] = None
+            
+        try:
+            posted_date = find_by_class(review, 'review_action post_date', element_type='li')
+            if posted_date:
+                review_dict['post_date'] = posted_date.getText().replace('Posted ', '')
+            else:
+                review_dict['post_date'] = None
+        except:
             review_dict['post_date'] = None
 
         reviews.append(review_dict)

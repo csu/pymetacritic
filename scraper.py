@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-LETTER_RANGE = lowercase[0:13]
+LETTER_RANGE = lowercase[21:]
 
 def save(obj, file_name):
     with open(file_name, 'w') as outfile:
