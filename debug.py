@@ -10,4 +10,4 @@ logger.setLevel(logging.DEBUG)
 #     json.dump(result, outfile)
 
 metacritic.get_movie_critic('aa-dowd')
-# metacritic.get_movie_critic('aaron-hillis')
+metacritic.get_movie_critic('aaron-hillis')

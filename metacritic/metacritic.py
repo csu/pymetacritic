@@ -117,7 +117,12 @@ def get_reviews_by_critic(url):
         review_dict['score'] = int(find_by_class(review, re.compile(r".*\bmetascore_w\b.*"), element_type='span').getText())
         review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
         review_dict['publication_title'] = find_by_class(review, 'review_action publication_title', element_type='li').getText()
-        review_dict['post_date'] = find_by_class(review, 'review_action post_date', element_type='li').getText().replace('Posted ', '')
+        
+        posted_date = find_by_class(review, 'review_action post_date', element_type='li')
+        if posted_date:
+            review_dict['post_date'] = posted_date.getText().replace('Posted ', '')
+        else:
+            review_dict['post_date'] = None
 
         reviews.append(review_dict)
 
