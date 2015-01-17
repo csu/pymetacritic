@@ -6,6 +6,7 @@ import re
 import logging
 
 def keep_trying_to_get_html(url):
+    logging.debug('[keep_trying_to_get_html] Making request to: ' + url)
     try:
         request = urllib2.Request(url)
         request.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36')
@@ -13,7 +14,7 @@ def keep_trying_to_get_html(url):
         html_doc = opener.open(request).read()
         return html_doc
     except:
-        logging.debug('[keep_trying_to_get_html] HTTP error. Retrying...')
+        logging.debug('[keep_trying_to_get_html] HTTP error on ' + url + '. Retrying...')
         time.sleep(3)
         return keep_trying_to_get_html(url)
 
@@ -99,9 +100,7 @@ def get_movie_critic(slug):
 
     result['reviews'] = get_reviews_by_critic(url)
 
-    print len(result['reviews'])
-
-    print result
+    logging.debug(str(len(result['reviews'])) + ' reviews found in total for ' + slug)
 
 def get_reviews_by_critic(url):
     html_doc = keep_trying_to_get_html(url)
@@ -120,7 +119,7 @@ def get_reviews_by_critic(url):
 
         reviews.append(review_dict)
 
-    logging.debug('[keep_trying_to_get_html] ' + str(len(reviews)) + 'reviews found on page.')
+    logging.debug('[keep_trying_to_get_html] ' + str(len(reviews)) + ' reviews found on page.')
     
     pagination = find_by_class(soup, 'flipper next', element_type='span').find('a')
     if pagination:
