@@ -108,9 +108,11 @@ def get_movie_critic(slug):
 
     result['movie_reviews_count'] = cast_int(find_by_class(find_by_class(soup, 'reviews_total'), 'count', element_type='span').find('a').getText())
 
+
+    review_scores_element = find_by_class(soup, 'profile_score_summary critscore_summary')
     result['average_review_score'] = cast_int(find_by_class(soup, re.compile(r".*\btextscore\b.*"), element_type='span').getText())
-    result['highest_review_score'] = cast_int(find_by_class(soup, 'metascore_w small movie positive indiv perfect', element_type='span').getText())
-    result['lowest_review_score'] = cast_int(find_by_class(soup, 'metascore_w small movie negative indiv', element_type='span').getText())
+    result['highest_review_score'] = cast_int(find_by_class(review_scores_element, 'highest_review', element_type='tr').find('span').getText())
+    result['lowest_review_score'] = cast_int(find_by_class(review_scores_element, 'lowest_review', element_type='tr').find('span').getText())
 
     result['reviews'] = get_reviews_by_critic(url)
 
@@ -144,9 +146,20 @@ def get_reviews_by_critic(url):
 
     logging.debug('[keep_trying_to_get_html] ' + str(len(reviews)) + ' reviews found on page.')
     
-    pagination = find_by_class(soup, 'flipper next', element_type='span').find('a')
+    pagination = find_by_class(soup, 'flipper next', element_type='span')
+    if pagination:
+        pagination = pagination.find('a')
     if pagination:
         logging.debug('[get_reviews_by_critic] Next page found. Recursing.')
-        reviews += get_reviews_by_critic('http://www.metacritic.com' + pagination['href'])
+        next_page_reviews = get_reviews_by_critic('http://www.metacritic.com' + pagination['href'])
+
+        # Don't add duplicate reviews that Metacritic for some reason shows (their pagination is broken)
+        for new_review in next_page_reviews:
+            already_exists = False
+            for old_review in reviews:
+                if new_review['movie_name'] == old_review['movie_name']:
+                    already_exists = True
+            if not already_exists:
+                reviews.append(new_review)
 
     return reviews
