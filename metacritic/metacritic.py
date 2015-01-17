@@ -3,6 +3,7 @@ import time
 from string import lowercase as lowercase_letters
 from bs4 import BeautifulSoup
 import re
+import logging
 
 def keep_trying_to_get_html(url):
     try:
@@ -12,6 +13,7 @@ def keep_trying_to_get_html(url):
         html_doc = opener.open(request).read()
         return html_doc
     except:
+        logging.debug('[keep_trying_to_get_html] HTTP error. Retrying...')
         time.sleep(3)
         return keep_trying_to_get_html(url)
 
@@ -117,9 +119,12 @@ def get_reviews_by_critic(url):
         review_dict['post_date'] = find_by_class(review, 'review_action post_date', element_type='li').getText().replace('Posted ', '')
 
         reviews.append(review_dict)
+
+    logging.debug('[keep_trying_to_get_html] ' + str(len(reviews)) + 'reviews found on page.')
     
     pagination = find_by_class(soup, 'flipper next', element_type='span').find('a')
     if pagination:
+        logging.debug('[get_reviews_by_critic] Next page found. Recursing.')
         reviews += get_reviews_by_critic('http://www.metacritic.com' + pagination['href'])
 
     return reviews
