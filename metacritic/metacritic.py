@@ -1,4 +1,4 @@
-import requests
+import urllib2
 import time
 from string import lowercase as lowercase_letters
 from bs4 import BeautifulSoup
@@ -22,11 +22,13 @@ def cast_float(string):
         return None
 
 def keep_trying_to_get_html(url, attempt=0):
-    logging.debug('[keep_trying_to_get_html] Making GET request to: ' + url)
+    logging.debug('[keep_trying_to_get_html] Making request to: ' + url)
     try:
-        req = requests.get(url, headers=REQUEST_HEADERS)
-        req.raise_for_status()
-        return req.text
+        request = urllib2.Request(url)
+        request.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36')
+        opener = urllib2.build_opener()
+        html_doc = opener.open(request).read()
+        return html_doc
     except:
         if attempt > 10:
             logging.error("Giving up on HTTP request: " + url)

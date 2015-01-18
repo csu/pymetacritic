@@ -10,4 +10,5 @@ virtualenv env
 source env/bin/activate
 pip install -r requirements.txt
 
-python scraper.py "$1" "$2"
+screen -S scraper -d -m python scraper.py "$1" "$2"
+echo "Scraper started from $1 to $2."
