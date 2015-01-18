@@ -171,14 +171,21 @@ def get_reviews_by_critic(url):
 
         review_dict['movie_name'] = find_by_class(review, 'review_product').find('a').getText()
 
+        # Gets the release year of the movie
+        # try:
+        #     movie_url = find_by_class(review, 'review_product').find('a')['href']
+        #     movie_html = keep_trying_to_get_html('http://www.metacritic.com' + movie_url)
+        #     movie_soup = BeautifulSoup(movie_html)
+        #     movie_date = movie_soup.find('li', class_='summary_detail release_data').find('span', class_='data').getText().strip()
+        #     review_dict['movie_year'] = int(movie_date.split(', ')[-1])
+        # except:
+        #     review_dict['movie_year'] = None
+
+        # Gets the slug of the movie
         try:
-            movie_url = find_by_class(review, 'review_product').find('a')['href']
-            movie_html = keep_trying_to_get_html('http://www.metacritic.com' + movie_url)
-            movie_soup = BeautifulSoup(movie_html)
-            movie_date = movie_soup.find('li', class_='summary_detail release_data').find('span', class_='data').getText().strip()
-            review_dict['movie_year'] = int(movie_date.split(', ')[-1])
+            review_dict['movie_slug'] = find_by_class(review, 'review_product').find('a')['href'].replace('/movie/', '')
         except:
-            review_dict['movie_year'] = None
+            review_dict['movie_slug'] = None
 
         try:
             review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
