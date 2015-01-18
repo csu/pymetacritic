@@ -35,36 +35,6 @@ def keep_trying_to_get_html(url, attempt=0):
         time.sleep(3)
         return keep_trying_to_get_html(url, attempt=attempt+1)
 
-def keep_trying_to_post(url, referer=None, attempt=0):
-    logging.debug('[keep_trying_to_post] Making POST request to: ' + url)
-    try:
-        headers = {
-                'Accept-Encoding': 'gzip, deflate',
-                'Accept-Language': 'en-US,en;q=0.8',
-                'Host': 'www.metacritic.com',
-                'Origin': 'http://www.metacritic.com',
-                'DNT': '1',
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        if referer:
-            headers['Referer'] = referer
-
-        print url
-        print headers
-
-        req = requests.post(url, headers=headers)
-
-        req.raise_for_status()
-        return req.text
-    except:
-        if attempt > 10:
-            logging.error("Giving up on HTTP request: " + url)
-            raise Exception("Failed to fetch " + url)
-        logging.debug('[keep_trying_to_get_html] HTTP error on ' + url + '. Retrying...')
-        time.sleep(3)
-        return keep_trying_to_get_html(url, attempt=attempt+1)
-
 def get_movie_critics_for_letter(letter):
     url = 'http://www.metacritic.com/browse/movies/critic/name/' + letter + '?num_items=100'
     html_doc = keep_trying_to_get_html(url)
@@ -203,8 +173,10 @@ def get_reviews_by_critic(url):
 
         try:
             movie_url = find_by_class(review, 'review_product').find('a')['href']
-            movie_url = 'http://www.metacritic.com' + movie_url
-            print keep_trying_to_post(movie_url, referer=url)
+            movie_html = keep_trying_to_get_html('http://www.metacritic.com' + movie_url)
+            movie_soup = BeautifulSoup(movie_html)
+            movie_date = movie_soup.find('li', class_='summary_detail release_data').find('span', class_='data').getText().strip()
+            review_dict['movie_year'] = int(movie_date.split(', ')[-1])
         except:
             review_dict['movie_year'] = None
 
