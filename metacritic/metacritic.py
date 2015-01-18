@@ -1,9 +1,13 @@
-import urllib2
+import requests
 import time
 from string import lowercase as lowercase_letters
 from bs4 import BeautifulSoup
 import re
 import logging
+
+REQUEST_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
+}
 
 def cast_int(string):
     try:
@@ -18,13 +22,41 @@ def cast_float(string):
         return None
 
 def keep_trying_to_get_html(url, attempt=0):
-    logging.debug('[keep_trying_to_get_html] Making request to: ' + url)
+    logging.debug('[keep_trying_to_get_html] Making GET request to: ' + url)
     try:
-        request = urllib2.Request(url)
-        request.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36')
-        opener = urllib2.build_opener()
-        html_doc = opener.open(request).read()
-        return html_doc
+        req = requests.get(url, headers=REQUEST_HEADERS)
+        req.raise_for_status()
+        return req.text
+    except:
+        if attempt > 10:
+            logging.error("Giving up on HTTP request: " + url)
+            raise Exception("Failed to fetch " + url)
+        logging.debug('[keep_trying_to_get_html] HTTP error on ' + url + '. Retrying...')
+        time.sleep(3)
+        return keep_trying_to_get_html(url, attempt=attempt+1)
+
+def keep_trying_to_post(url, referer=None, attempt=0):
+    logging.debug('[keep_trying_to_post] Making POST request to: ' + url)
+    try:
+        headers = {
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'en-US,en;q=0.8',
+                'Host': 'www.metacritic.com',
+                'Origin': 'http://www.metacritic.com',
+                'DNT': '1',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        if referer:
+            headers['Referer'] = referer
+
+        print url
+        print headers
+
+        req = requests.post(url, headers=headers)
+
+        req.raise_for_status()
+        return req.text
     except:
         if attempt > 10:
             logging.error("Giving up on HTTP request: " + url)
@@ -168,6 +200,13 @@ def get_reviews_by_critic(url):
         review_dict = dict()
 
         review_dict['movie_name'] = find_by_class(review, 'review_product').find('a').getText()
+
+        try:
+            movie_url = find_by_class(review, 'review_product').find('a')['href']
+            movie_url = 'http://www.metacritic.com' + movie_url
+            print keep_trying_to_post(movie_url, referer=url)
+        except:
+            review_dict['movie_year'] = None
 
         try:
             review_dict['review_body'] = find_by_class(review, 'review_body').getText().strip()
