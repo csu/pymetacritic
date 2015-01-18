@@ -1,5 +1,6 @@
 import metacritic
 import os
+import sys
 import json
 from string import lowercase
 
@@ -7,7 +8,8 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-LETTER_RANGE = lowercase[0:26]
+LETTER_RANGE = lowercase[int(sys.argv[1]):int(sys.argv[2])]
+logging.info('Starting scraper from letters ' + LETTER_RANGE[0] + ' to ' + LETTER_RANGE[-1] + '.')
 
 def save(obj, file_name):
     with open(file_name, 'w') as outfile:
