@@ -11,4 +11,9 @@ setup(
   download_url = 'https://github.com/csu/pymetacritic/tarball/0.1',
   keywords = ['api', 'metacritic', 'scraper'],
   classifiers = [],
+  install_requires = [
+      'beautifulsoup4',
+      'requests',
+      'wsgiref',
+  ],
 )
