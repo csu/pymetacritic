@@ -17,7 +17,7 @@ wget https://raw.githubusercontent.com/csu/pymetacritic/master/scraper.sh
 sh scraper.sh 0 6
 ```
 
-Or (replace arg1 and arg2 with letter indices):
+Or (replace 0 and 6 with letter indices):
 ```shell
-curl -s http://server/path/script.sh | bash /dev/stdin arg1 arg2
+curl -s https://raw.githubusercontent.com/csu/pymetacritic/master/scraper.sh | bash /dev/stdin 0 6
 ```
